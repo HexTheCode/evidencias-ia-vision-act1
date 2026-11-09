@@ -61,6 +61,23 @@ El autor llevó además, durante la actividad, un **registro propio de uso de IA
 | 2026-11-09 | Claude Code | Estructura del documento, posición de figuras y revisión de las Conclusiones | [2026-11-09_estructura-conclusiones.md](claude-code/2026-11-09_estructura-conclusiones.md) |
 | 2026-11-09 | Claude Code | Recopilación del uso de IA en la actividad y cómo evidenciarlo | [2026-11-09_extraccion-uso-ia.md](claude-code/2026-11-09_extraccion-uso-ia.md) |
 
+## Código de la actividad
+
+La carpeta [`codigo/`](codigo/) contiene el código con el que se obtuvieron los resultados
+de la memoria. Es el mismo que se incluye en sus anexos.
+
+| Fichero | Contenido |
+|---|---|
+| [`mejora_imagen.py`](codigo/mejora_imagen.py) | Funciones de carga, técnicas de mejora, métricas y figuras (Anexo A) |
+| [`act1_mejora_imagen.ipynb`](codigo/act1_mejora_imagen.ipynb) | Cuaderno principal: aplica las técnicas y genera las figuras y tablas de la memoria (Anexo B) |
+| [`img_extraction.py`](codigo/img_extraction.py) | Selección de las 4 imágenes entre una muestra de 100 del dataset (Anexo C) |
+| [`act1_experimentos.ipynb`](codigo/act1_experimentos.ipynb) | Cuaderno de pruebas exploratorias (no aporta resultados a la memoria) |
+| [`requirements.txt`](codigo/requirements.txt) | Versiones de las librerías usadas (Python 3.12.15) |
+
+Los cuadernos se publican **sin salidas**: contienen imágenes de Dark Face, que no se
+redistribuyen. Para reproducir los resultados, coloca las imágenes del dataset en `imgs/`
+junto al código y ejecuta los cuadernos.
+
 ## Qué contiene cada transcripción
 
 - **Incluido:**
@@ -88,6 +105,7 @@ El autor llevó además, durante la actividad, un **registro propio de uso de IA
 evidencias-ia/
 ├── README.md                    este fichero
 ├── USO_IA.md                    registro de uso de IA llevado por el autor durante la actividad
+├── codigo/                      código Python y cuadernos de la actividad (sin salidas)
 ├── claude-code/                 transcripciones de Claude Code (AAAA-MM-DD_tema.md)
 ├── claude-ai/                   transcripciones de claude.ai (AAAA-MM-DD_tema.md)
 └── scripts/
