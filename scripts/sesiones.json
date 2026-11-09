@@ -53,5 +53,58 @@
       "fichero": "2026-11-09_extraccion-uso-ia.md",
       "titulo": "Extracción del uso de IA en la actividad"
     }
+  ],
+  "salida_claude_ai": "claude-ai",
+  "claude_ai": [
+    {
+      "uuid": "4acd8049-3929-44e9-842a-773f90c44b4a",
+      "fichero": "2026-11-05_resumen-actividad-ecualizacion.md",
+      "titulo": "Resumen de la actividad y ecualización del histograma"
+    },
+    {
+      "uuid": "8b093c9a-ad64-465e-ad1c-abc7d7d85f4e",
+      "fichero": "2026-11-05_python-opencv-o-matlab.md",
+      "titulo": "Python con OpenCV o MATLAB y esqueleto del cuaderno"
+    },
+    {
+      "uuid": "fc2d4aaf-b7e8-4342-b469-e44cb2ba2b08",
+      "fichero": "2026-11-05_seleccion-imagenes.md",
+      "titulo": "Selección aleatoria de las imágenes"
+    },
+    {
+      "uuid": "f668b1e1-e707-4303-b7e8-7541b9943429",
+      "fichero": "2026-11-05_funcion-negativo.md",
+      "titulo": "Función negativo del cuaderno"
+    },
+    {
+      "uuid": "e81b29ba-6887-4fe8-bdb2-c4a02a086c16",
+      "fichero": "2026-11-05_configuracion-latex.md",
+      "titulo": "Configuración LaTeX para la memoria"
+    },
+    {
+      "uuid": "bdeebd72-7613-4171-84e4-d4a1752cfa12",
+      "fichero": "2026-11-05_metodos-pendientes.md",
+      "titulo": "Código de los métodos pendientes del cuaderno"
+    },
+    {
+      "uuid": "02e33878-38f7-463e-b7c4-1529c6faa210",
+      "fichero": "2026-11-06_contexto-claude-code.md",
+      "titulo": "Contexto (CLAUDE.md) para Claude Code"
+    },
+    {
+      "uuid": "15b41aac-4c28-412c-ad90-a5caca931a22",
+      "fichero": "2026-11-09_tipos-ecualizacion.md",
+      "titulo": "Tipos de ecualización de histogramas en los temas"
+    },
+    {
+      "uuid": "35808675-0488-44ea-b6a5-b07d62fb2c6e",
+      "fichero": "2026-11-09_tipo-letra-interlineado.md",
+      "titulo": "Tipo de letra e interlineado según el enunciado"
+    },
+    {
+      "uuid": "10f912bd-6139-4642-a0d9-bd14e4ee689f",
+      "fichero": "2026-11-09_estiramiento-no-lineal.md",
+      "titulo": "¿Es obligatorio el estiramiento no lineal?"
+    }
   ]
 }

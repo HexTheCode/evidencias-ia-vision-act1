@@ -21,3 +21,6 @@ __pycache__/
 *.png
 *.jpg
 *.jpeg
+
+# Manifiesto y ficheros del export de claude.ai (enlaces de descarga privados)
+manifest-*.json

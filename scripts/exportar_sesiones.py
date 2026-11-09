@@ -22,6 +22,11 @@ Uso:
     python3 scripts/exportar_sesiones.py                 # exporta según scripts/sesiones.json
     python3 scripts/exportar_sesiones.py --indice        # solo lista los prompts numerados
     python3 scripts/exportar_sesiones.py --privado scripts/privado.json
+    python3 scripts/exportar_sesiones.py --claude-ai ~/ruta/conversations.json   # claude.ai
+
+Las conversaciones de claude.ai se leen del conversations.json del export de la cuenta
+(Settings → Privacy → Export data) y se escriben en claude-ai/. Se incluyen las listadas
+en la clave «claude_ai» de la configuración: [{"uuid", "fichero", "titulo"}].
 
 Configuración (scripts/sesiones.json):
     {
@@ -388,6 +393,154 @@ def aplicar_privado(md: str, privado: dict) -> str:
     return md
 
 
+# ------------------------------------------------- conversaciones claude.ai
+RE_SANDBOX = [
+    (re.compile(r"/tmp/claude-\d+/-home-claude/[0-9a-f-]{36}/"), "<tmp>/"),
+    (re.compile(r"/mnt/user-data/attachments/[0-9a-f-]{36}/"), "<adjuntos>/"),
+    (re.compile(r"/mnt/user-data/(uploads|outputs)/"), r"<\1>/"),
+    (re.compile(r"/projects/[0-9a-f-]{36}/"), "<proyecto>/"),
+]
+
+
+def anonimizar_sandbox(texto: str) -> str:
+    for patron, reemplazo in RE_SANDBOX:
+        texto = patron.sub(reemplazo, texto)
+    return texto
+
+
+def resumir_herramienta_web(nombre: str, entrada: dict) -> str:
+    e = entrada or {}
+    corto = nombre.split("__")[-1]
+    if nombre == "Projects":
+        detalle = e.get("method", "")
+        if e.get("path"):
+            detalle += f" {e['path']}"
+        if e.get("query"):
+            detalle += f" «{e['query']}»"
+        return f"[Proyecto] {recortar(anonimizar_sandbox(detalle))}"
+    if corto == "memory_read":
+        rutas = e.get("path")
+        rutas = rutas if isinstance(rutas, list) else [rutas]
+        return f"[Memoria] {', '.join(os.path.basename(str(r)) for r in rutas)}"
+    if corto == "conversation_search":
+        return f"[Buscar en chats] «{e.get('query', '')}»"
+    if corto == "recent_chats":
+        return f"[Chats recientes] {e.get('n', '')}"
+    if nombre == "SendUserFile":
+        return f"[Fichero enviado] {recortar(e.get('caption', ''))}"
+    # anonimizar las rutas del sandbox ANTES de que resumir_herramienta recorte la línea
+    e = {k: anonimizar_sandbox(v) if isinstance(v, str) else v for k, v in e.items()}
+    return resumir_herramienta(corto, e)
+
+
+def leer_conversacion(c: dict) -> dict:
+    meta = {"inicio": c.get("created_at"), "fin": None, "herramientas": Counter()}
+    msgs = sorted(c.get("chat_messages", []), key=lambda m: m.get("created_at", ""))
+    turnos = []
+    for m in msgs:
+        meta["fin"] = m.get("created_at") or meta["fin"]
+        bloques = m.get("content") or []
+        if m.get("sender") == "human":
+            textos = [b.get("text", "") for b in bloques if b.get("type") == "text"]
+            texto = "\n\n".join(t for t in textos if t.strip()) or (m.get("text") or "")
+            adjuntos = [a.get("file_name") for a in (m.get("attachments") or []) + (m.get("files") or [])]
+            adjuntos = list(dict.fromkeys(a for a in adjuntos if a))
+            imagenes = sum(1 for b in bloques if b.get("type") == "image")
+            turnos.append({"prompt": escapar_etiquetas(texto.strip()), "ts": m.get("created_at"),
+                           "adjuntos": adjuntos, "imagenes": imagenes, "items": []})
+            continue
+        if not turnos:
+            turnos.append({"prompt": None, "ts": m.get("created_at"), "adjuntos": [], "imagenes": 0, "items": []})
+        for b in bloques:
+            if b.get("type") == "text" and b.get("text", "").strip():
+                turnos[-1]["items"].append(("texto", b["text"].strip()))
+            elif b.get("type") == "tool_use":
+                meta["herramientas"][b.get("name", "?").split("__")[-1]] += 1
+                turnos[-1]["items"].append(("herramienta", (resumir_herramienta_web(b.get("name", "?"), b.get("input")), [])))
+    return {"meta": meta, "turnos": turnos}
+
+
+def render_web(conv: dict, cfg_conv: dict, raiz: str, home: str, usuario: str) -> str:
+    meta, turnos = conv["meta"], conv["turnos"]
+    ini, fin = hora_local(meta["inicio"]), hora_local(meta["fin"])
+    mismo_dia = ini and fin and ini.date() == fin.date()
+    herr = ", ".join(f"{k} ×{v}" for k, v in meta["herramientas"].most_common()) or "ninguna"
+    out = [f"# {cfg_conv.get('titulo', 'Conversación en claude.ai')}", "",
+           "| | |", "|---|---|",
+           "| Herramienta | Claude en claude.ai (proyecto de la asignatura) |",
+           "| Modelo | no consta en el export |",
+           f"| Inicio | {ini.strftime('%Y-%m-%d %H:%M %Z') if ini else '?'} |",
+           f"| Fin | {fin.strftime('%Y-%m-%d %H:%M %Z') if fin else '?'} |",
+           f"| Conversación | {codigo_en_linea(cfg_conv['uuid'])} |",
+           f"| Mensajes del autor | {sum(1 for t in turnos if t['prompt'] is not None)} |",
+           f"| Llamadas a herramientas | {herr} |", "",
+           "> Transcripción generada con `scripts/exportar_sesiones.py` a partir del export de la "
+           "cuenta de claude.ai. Se reproducen completos los mensajes del autor y los textos de "
+           "respuesta de Claude; las llamadas a herramientas se resumen en una línea y se omiten sus "
+           "resultados, el contenido de los adjuntos y el razonamiento interno del modelo.", ""]
+    num = 0
+    for t in turnos:
+        if t["prompt"] is not None:
+            num += 1
+            d = hora_local(t["ts"])
+            out += ["---", "", f"## Mensaje {num} · {d.strftime('%H:%M' if mismo_dia else '%Y-%m-%d %H:%M') if d else ''}", ""]
+            texto = t["prompt"]
+            extras = [f"*[Fichero adjunto: {codigo_en_linea(a)}]*" for a in t["adjuntos"]]
+            if t["imagenes"]:
+                extras.append(f"*[{t['imagenes']} imagen(es) adjunta(s)]*")
+            texto = "\n\n".join(x for x in [texto] + extras if x)
+            out += ["**Autor:**", "", cita(texto), ""]
+        primera, en_lista = True, False
+        for tipo, datos in t["items"]:
+            if primera:
+                out += ["**Claude:**", ""]
+                primera = False
+            if tipo == "herramienta":
+                if not en_lista and out[-1] != "":
+                    out.append("")
+                en_lista = True
+                out.append(f"- {codigo_en_linea(datos[0])}")
+                continue
+            if en_lista:
+                out.append("")
+                en_lista = False
+            out += [datos, ""]
+        if en_lista:
+            out.append("")
+    md = "\n".join(out).rstrip() + "\n"
+    return anonimizar_sandbox(anonimizar(md, raiz, home, usuario))
+
+
+def exportar_claude_ai(ruta_json: str, cfg: dict, base: str, raiz: str, home: str, usuario: str,
+                       privado: dict, indice: bool) -> int:
+    with open(ruta_json, encoding="utf-8") as fh:
+        datos = {c["uuid"]: c for c in json.load(fh)}
+    salida = os.path.join(base, cfg.get("salida_claude_ai", "claude-ai"))
+    os.makedirs(salida, exist_ok=True)
+    for s in cfg.get("claude_ai", []):
+        c = datos.get(s["uuid"])
+        if c is None:
+            print(f"ERROR: la conversación {s['uuid']} no está en el export", file=sys.stderr)
+            return 1
+        conv = leer_conversacion(c)
+        if indice:
+            print(f"\n=== {s['uuid'][:8]}  {s['fichero']}")
+            n = 0
+            for t in conv["turnos"]:
+                if t["prompt"] is None:
+                    continue
+                n += 1
+                p = anonimizar(t["prompt"], raiz, home, usuario).replace("\n", " ⏎ ")
+                print(f"{n:3d}. {hora_local(t['ts']).strftime('%H:%M')}  ({len(t['prompt'])} car.)  {p[:160]}")
+            continue
+        md = aplicar_privado(render_web(conv, s, raiz, home, usuario), privado)
+        destino = os.path.join(salida, s["fichero"])
+        with open(destino, "w", encoding="utf-8") as fh:
+            fh.write(md)
+        print(f"{s['uuid'][:8]} -> {os.path.relpath(destino, base)}  ({len(md) / 1024:.1f} KB)")
+    return 0
+
+
 # ------------------------------------------------------------------- main
 def main() -> int:
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -397,6 +550,9 @@ def main() -> int:
                     help="configuración privada (se ignora si no existe)")
     ap.add_argument("--indice", action="store_true", help="solo imprime los prompts numerados")
     ap.add_argument("--solo", help="exportar solo la sesión cuyo id empiece por este prefijo")
+    ap.add_argument("--claude-ai", metavar="CONVERSATIONS_JSON",
+                    help="exporta en su lugar las conversaciones de claude.ai listadas en "
+                         "«claude_ai» de la configuración, a partir del conversations.json del export")
     args = ap.parse_args()
 
     with open(args.config, encoding="utf-8") as fh:
@@ -414,6 +570,9 @@ def main() -> int:
     os.makedirs(salida, exist_ok=True)
     global ANONIMIZAR
     ANONIMIZAR = lambda s: anonimizar(s, raiz, home, usuario)
+    if args.claude_ai:
+        return exportar_claude_ai(os.path.expanduser(args.claude_ai), cfg, base, raiz, home,
+                                  usuario, privado, args.indice)
 
     for s in cfg["sesiones"]:
         if args.solo and not s["id"].startswith(args.solo):
