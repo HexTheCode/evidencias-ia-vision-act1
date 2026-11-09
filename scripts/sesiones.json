@@ -1,0 +1,57 @@
+{
+  "raiz_proyecto": "~/Desktop/Máster/Visión Artificial/Actividad 1",
+  "directorio_sesiones": "~/.claude/projects",
+  "salida": "claude-code",
+  "sesiones": [
+    {
+      "id": "1ded0e3a-7119-4343-8f19-2b51be141e49",
+      "fichero": "2026-11-05_esqueleto-latex.md",
+      "titulo": "Esqueleto del documento LaTeX de la memoria"
+    },
+    {
+      "id": "955a3f9a-e140-4433-82ec-32789b1f8573",
+      "fichero": "2026-11-06_entorno-vscode-venv.md",
+      "titulo": "Selección del entorno virtual (kernel) en VS Code"
+    },
+    {
+      "id": "6de83b6d-c329-498a-a042-61b5fa520065",
+      "fichero": "2026-11-06_realce-laplaciano.md",
+      "titulo": "Técnica de realce laplaciano en el cuaderno"
+    },
+    {
+      "id": "36b7118e-207a-47ea-b0e5-9312366dc43c",
+      "fichero": "2026-11-06_revision-introduccion-metodos.md",
+      "titulo": "Coordinación LaTeX/cuadernos y revisión de Introducción y Material y métodos"
+    },
+    {
+      "id": "33c5d169-a3b5-4cfb-b738-279d75e796e2",
+      "fichero": "2026-11-08_gamma-hallazgos-funciones.md",
+      "titulo": "Contraste RMS, hallazgos de la corrección gamma y funciones de comparación"
+    },
+    {
+      "id": "75e0cc36-fd44-4aac-bce7-1ff43d1ad8e6",
+      "fichero": "2026-11-08_comparativas-multiples.md",
+      "titulo": "Comparativas múltiples de técnicas y revisión de hallazgos"
+    },
+    {
+      "id": "0f5016cd-2714-4581-a1a2-30f74afb1650",
+      "fichero": "2026-11-08_integrar-hallazgos-latex.md",
+      "titulo": "Integración de los hallazgos en la memoria LaTeX"
+    },
+    {
+      "id": "1749a0ca-ae5b-473f-9c40-e707d6e9d331",
+      "fichero": "2026-11-09_revision-memoria.md",
+      "titulo": "Revisión de métodos y resultados de la memoria"
+    },
+    {
+      "id": "75cfe70b-6dca-4b95-a5d0-aa81c41a5b16",
+      "fichero": "2026-11-09_estructura-conclusiones.md",
+      "titulo": "Estructura del documento y conclusiones"
+    },
+    {
+      "id": "937834b1-a833-4456-912e-488af5ca6b8e",
+      "fichero": "2026-11-09_extraccion-uso-ia.md",
+      "titulo": "Extracción del uso de IA en la actividad"
+    }
+  ]
+}

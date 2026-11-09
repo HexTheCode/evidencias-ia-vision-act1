@@ -1,0 +1,23 @@
+# Configuración privada del exportador
+scripts/privado.json
+
+# Sesiones crudas de Claude Code y exports sin anonimizar
+*.jsonl
+conversations.json
+*.zip
+
+# Entornos, secretos y cachés
+.venv/
+venv/
+.env
+.env.*
+__pycache__/
+*.pyc
+
+# Material de la asignatura y del dataset (no se publica)
+*.pdf
+*.docx
+*.xlsx
+*.png
+*.jpg
+*.jpeg
